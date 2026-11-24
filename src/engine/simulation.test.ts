@@ -10,6 +10,7 @@ import {
   killChromeProcess,
   logFuchsiaSheetEval,
   openChromeWindow,
+  parseSectionFromUrl,
   runArchitectureTests,
   runCroshCommand,
   runFfxCommand,
@@ -145,4 +146,12 @@ test('Testing Lab: automated architecture suite passes all 6 checks', () => {
   for (const r of results) {
     assert.equal(r.status, 'PASS', `Expected ${r.id} to pass`);
   }
+});
+
+test('Router: parses hash routes and falls back to query section or inicio', () => {
+  assert.equal(parseSectionFromUrl('#/chromeos', ''), 'chromeos');
+  assert.equal(parseSectionFromUrl('#fuchsia', ''), 'fuchsia');
+  assert.equal(parseSectionFromUrl('#/docs', '?section=rtos'), 'docs');
+  assert.equal(parseSectionFromUrl('', '?section=rtos'), 'rtos');
+  assert.equal(parseSectionFromUrl('#/desconocido', ''), 'inicio');
 });

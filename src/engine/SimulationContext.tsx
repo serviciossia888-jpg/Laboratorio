@@ -10,6 +10,7 @@ import {
   killChromeProcess,
   logFuchsiaSheetEval,
   openChromeWindow,
+  parseSectionFromUrl,
   removeModuleFromStory,
   reorderModuleInStory,
   runArchitectureTests,
@@ -107,23 +108,32 @@ const SimulationContext = createContext<SimulationContextValue | null>(null);
 
 function getInitialSection(): SectionId {
   if (typeof window === 'undefined') return 'inicio';
-  const param = new URLSearchParams(window.location.search).get('section');
-  if (
-    param === 'inicio' ||
-    param === 'chromeos' ||
-    param === 'fuchsia' ||
-    param === 'rtos' ||
-    param === 'pruebas' ||
-    param === 'docs'
-  ) {
-    return param;
-  }
-  return 'inicio';
+  return parseSectionFromUrl(window.location.hash, window.location.search);
 }
 
 export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<SharedEngineState>(() => createInitialEngineState());
-  const [activeSection, setActiveSection] = useState<SectionId>(getInitialSection);
+  const [activeSection, setActiveSectionState] = useState<SectionId>(getInitialSection);
+
+  const setActiveSection = useCallback((section: SectionId) => {
+    setActiveSectionState(section);
+    if (typeof window !== 'undefined') {
+      const targetHash = `#/${section}`;
+      if (window.location.hash !== targetHash) {
+        window.location.hash = targetHash;
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onHashChange = () => {
+      const next = parseSectionFromUrl(window.location.hash, window.location.search);
+      setActiveSectionState(next);
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => {

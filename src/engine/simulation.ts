@@ -12,9 +12,31 @@ import {
   FuchsiaStory,
   RTOSState,
   RTOSTask,
+  SectionId,
   SharedEngineState,
   TestResult,
 } from './types';
+
+const VALID_SECTIONS: ReadonlySet<string> = new Set([
+  'inicio',
+  'chromeos',
+  'fuchsia',
+  'rtos',
+  'pruebas',
+  'docs',
+]);
+
+export function parseSectionFromUrl(hash: string, search: string): SectionId {
+  const cleanHash = hash.replace(/^#\/?/, '').split('?')[0].trim().toLowerCase();
+  if (VALID_SECTIONS.has(cleanHash)) {
+    return cleanHash as SectionId;
+  }
+  const param = new URLSearchParams(search).get('section')?.trim().toLowerCase() ?? '';
+  if (VALID_SECTIONS.has(param)) {
+    return param as SectionId;
+  }
+  return 'inicio';
+}
 
 export const CHROME_APP_META: Record<
   ChromeAppId,
