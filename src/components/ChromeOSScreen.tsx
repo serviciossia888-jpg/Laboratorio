@@ -31,11 +31,10 @@ import {
   WifiOff,
   X,
 } from 'lucide-react';
+import CHROME_WALLPAPER from '../assets/images/chromeos_wallpaper_1795462416369.jpg';
 import { evaluateSheetCell } from '../engine/simulation';
 import { useSimulation } from '../engine/SimulationContext';
 import { ChromeAppId, ChromeNoteItem, ChromeWindow } from '../engine/types';
-
-const CHROME_WALLPAPER = '/src/assets/images/chromeos_wallpaper_1795462416369.jpg';
 
 const APP_ITEMS: { id: ChromeAppId; label: string; color: string; icon: React.ReactNode }[] = [
   { id: 'browser', label: 'Navegador', color: 'bg-sky-600 text-white', icon: <Globe className="w-5 h-5" /> },

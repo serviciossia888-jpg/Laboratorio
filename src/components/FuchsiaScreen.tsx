@@ -21,11 +21,10 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
+import FUCHSIA_WALLPAPER from '../assets/images/fuchsia_bg_flat_1795462428234.jpg';
 import { evaluateSheetCell } from '../engine/simulation';
 import { useSimulation } from '../engine/SimulationContext';
 import { FuchsiaModule, FuchsiaModuleType } from '../engine/types';
-
-const FUCHSIA_WALLPAPER = '/src/assets/images/fuchsia_bg_flat_1795462428234.jpg';
 
 const MODULE_OPTIONS: { type: FuchsiaModuleType; label: string; icon: React.ReactNode }[] = [
   { type: 'doc-editor', label: 'Editor Docs VMO', icon: <FileText className="w-4 h-4" /> },
