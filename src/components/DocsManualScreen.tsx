@@ -34,8 +34,6 @@ interface OSDossier {
   architectureSummary: string;
   layers: { label: string; detail: string; accent: string }[];
   concepts: ConceptBlock[];
-  workflowTitle: string;
-  workflowSteps: { step: string; detail: string }[];
   influence: string;
   futureTrends: string[];
 }
@@ -79,25 +77,6 @@ const OS_DOSSIERS: Record<Exclude<DocsTopic, 'manual'>, OSDossier> = {
         explanation:
           'El firmware verifica la firma del kernel y dm-verity valida bloque a bloque la raíz de solo lectura, revirtiendo automáticamente ante alteraciones.',
         simulatorLinkLabel: 'Inspeccionar en Crosh / Archivos',
-      },
-    ],
-    workflowTitle: 'Ejemplo práctico: Aislamiento de fallos y propagación de red',
-    workflowSteps: [
-      {
-        step: '1. Crear carga aislada',
-        detail: 'Abre el Navegador en Chrome OS y pulsa "+" para crear una pestaña; observa su PID propio.',
-      },
-      {
-        step: '2. Verificar en Monitor',
-        detail: 'Pulsa Shift+Esc o abre "Monitor de tareas" y ubica el proceso Renderer con ese PID.',
-      },
-      {
-        step: '3. Finalizar proceso',
-        detail: 'Haz clic en "Finalizar proceso": solo esa pestaña se cierra; el resto del escritorio sigue vivo.',
-      },
-      {
-        step: '4. Corte de red Wi-Fi',
-        detail: 'Desactiva Wi-Fi en Ajustes rápidos y ejecuta "ping 8.8.8.8" en Crosh para verificar la propagación.',
       },
     ],
     influence:
@@ -148,25 +127,6 @@ const OS_DOSSIERS: Record<Exclude<DocsTopic, 'manual'>, OSDossier> = {
         simulatorLinkLabel: 'Probar Reproductor + Monitor IPC',
       },
     ],
-    workflowTitle: 'Ejemplo práctico: Composición de Stories y trazado de canales FIDL',
-    workflowSteps: [
-      {
-        step: '1. Componer Story',
-        detail: 'En Fuchsia, abre "Overview", crea una Story y agrega "Reproductor" y "Monitor de canales IPC".',
-      },
-      {
-        step: '2. Trazar tráfico FIDL',
-        detail: 'Con el Reproductor activo, observa mensajes WriteBuffer() hacia /core/audio_core en microsegundos.',
-      },
-      {
-        step: '3. Auditar capacidades',
-        detail: 'Selecciona cualquier nodo del "Árbol de Componentes" para revisar sus handles Zircon activos.',
-      },
-      {
-        step: '4. Inspección con ffx',
-        detail: 'En "Terminal ffx" ejecuta "ffx component list" o "ffx log" para auditar la topología viva.',
-      },
-    ],
     influence:
       'Opera ya en producción sobre pantallas inteligentes (Google Nest Hub) y sirve como referente de sistemas limpios orientados a capacidades.',
     futureTrends: [
@@ -215,25 +175,6 @@ const OS_DOSSIERS: Record<Exclude<DocsTopic, 'manual'>, OSDossier> = {
         simulatorLinkLabel: 'Probar umbral térmico y Watchdog',
       },
     ],
-    workflowTitle: 'Ejemplo práctico: Respuesta física en tiempo real ante anomalía térmica',
-    workflowSteps: [
-      {
-        step: '1. Ciclo nominal',
-        detail: 'En RTOS Embebido observa el LED GPIO2 parpadeando y la onda de temperatura en la OLED 128×64.',
-      },
-      {
-        step: '2. Umbral ≥ 50 °C',
-        detail: 'Sube "Temperatura ADC0" por encima de 50 °C: el LED ALARM (GPIO15) se activa y UART0 registra [ISR_THERMAL].',
-      },
-      {
-        step: '3. Control por UART',
-        detail: 'Escribe "suspend Task_Blink" o "blink 150" en la consola UART y observa el cambio físico en la placa.',
-      },
-      {
-        step: '4. Recuperación Watchdog',
-        detail: 'Pulsa "Simular Panic" para observar la detección de Stack Overflow y el reinicio automático por Watchdog.',
-      },
-    ],
     influence:
       'Columna vertebral de miles de millones de nodos conectados: domótica, sensores industriales, equipos médicos, satélites y electrónica automotriz.',
     futureTrends: [
@@ -251,7 +192,7 @@ export const DocsManualScreen: React.FC = () => {
   const [slideIndex, setSlideIndex] = useState(0);
 
   const dossier = topic !== 'manual' ? OS_DOSSIERS[topic] : null;
-  const totalSlides = topic === 'manual' ? 3 : 4;
+  const totalSlides = 3;
 
   // Reset slide index when topic changes
   const handleSelectTopic = (nextTopic: DocsTopic) => {
@@ -551,45 +492,11 @@ export const DocsManualScreen: React.FC = () => {
       );
     }
 
-    if (slideIndex === 2) {
-      return (
-        <div className="space-y-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="space-y-2">
-              <p className="text-base sm:text-lg font-semibold text-sky-700">
-                Diapositiva 3 · {dossier.name} — Ejemplo Práctico en Clase
-              </p>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold text-slate-900">
-                {dossier.workflowTitle}
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => setActiveSection(dossier.targetSection)}
-              className="inline-flex items-center gap-2 px-5 py-3 text-base font-semibold bg-sky-600 text-white rounded-xl hover:bg-sky-700 cursor-pointer"
-            >
-              <span>Demostrar en el simulador</span>
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {dossier.workflowSteps.map((ws) => (
-              <div key={ws.step} className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-2">
-                <div className="text-xl font-bold text-slate-900">{ws.step}</div>
-                <p className="text-lg sm:text-xl text-slate-800 leading-relaxed">{ws.detail}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
     return (
       <div className="space-y-8">
         <div className="space-y-2">
           <p className="text-base sm:text-lg font-semibold text-sky-700">
-            Diapositiva 4 · {dossier.name} — Impacto y Futuro
+            Diapositiva 3 · {dossier.name} — Impacto y Futuro
           </p>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
             Influencia actual y tendencias futuras
@@ -1088,39 +995,9 @@ export const DocsManualScreen: React.FC = () => {
               </div>
             </section>
 
-            <section className="bg-white border border-slate-200 rounded-xl p-7 space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                <div>
-                  <p className="text-sm font-semibold text-sky-700">
-                    03. Ejemplo práctico reproducible en la aplicación
-                  </p>
-                  <h2 className="font-display text-2xl font-bold text-slate-900 mt-0.5">
-                    {dossier.workflowTitle}
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveSection(dossier.targetSection)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-sky-600 text-white rounded-lg hover:bg-sky-700 cursor-pointer"
-                >
-                  <span>Ejecutar flujo en el simulador</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {dossier.workflowSteps.map((ws) => (
-                  <div key={ws.step} className="p-5 bg-slate-50 rounded-xl space-y-2">
-                    <div className="text-base font-bold text-slate-900">{ws.step}</div>
-                    <p className="text-base text-slate-800 leading-relaxed">{ws.detail}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
             <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               <div className="lg:col-span-5 bg-white border border-slate-200 rounded-xl p-7 space-y-3">
-                <p className="text-sm font-semibold text-sky-700">04. Impacto actual</p>
+                <p className="text-sm font-semibold text-sky-700">03. Impacto actual</p>
                 <h2 className="font-display text-2xl font-bold text-slate-900">
                   Influencia en la industria
                 </h2>
