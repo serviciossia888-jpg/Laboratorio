@@ -1,0 +1,6 @@
+{
+  "name": "Laboratorio de SO Emergentes y de Nicho",
+  "description": "Simulador interactivo y laboratorio de pruebas comparativo para Chrome OS, Google Fuchsia y Sistemas Embebidos (RTOS).",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
