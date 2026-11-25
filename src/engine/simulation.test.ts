@@ -21,6 +21,7 @@ import {
   stepSimulation,
   toggleRtosTaskState,
 } from './simulation';
+import { PRESENTATION_SLIDE_COUNT, SLIDE_ART_CATALOG } from './presentationArt';
 
 test('Chrome OS: opening and killing a tab process maintains 1:1 renderer isolation', () => {
   const initial = createInitialEngineState();
@@ -155,3 +156,19 @@ test('Router: parses hash routes and falls back to query section or inicio', () 
   assert.equal(parseSectionFromUrl('', '?section=rtos'), 'rtos');
   assert.equal(parseSectionFromUrl('#/desconocido', ''), 'inicio');
 });
+
+test('Presentation Art: every OS defines 7 slides with coherent 16:9 infographic prompts', () => {
+  assert.equal(PRESENTATION_SLIDE_COUNT, 7);
+  for (const osId of ['chromeos', 'fuchsia', 'rtos'] as const) {
+    const specs = SLIDE_ART_CATALOG[osId];
+    assert.equal(specs.length, 7, `${osId} should have 7 slides`);
+    specs.forEach((spec, idx) => {
+      assert.equal(spec.slideNumber, idx + 1);
+      assert.ok(spec.graphicType.length > 10);
+      assert.ok(spec.textAdaptation.length > 20);
+      assert.ok(spec.layoutDistribution.length > 15);
+      assert.ok(spec.prompt.includes('16:9'));
+    });
+  }
+});
+

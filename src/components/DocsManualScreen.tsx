@@ -3,8 +3,11 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
+  Check,
   CheckCircle2,
+  Copy,
   Cpu,
+  Image as ImageIcon,
   Layers,
   Monitor,
   Presentation,
@@ -13,7 +16,9 @@ import {
   X,
 } from 'lucide-react';
 import { useSimulation } from '../engine/SimulationContext';
+import { PRESENTATION_SLIDE_COUNT, SLIDE_ART_CATALOG } from '../engine/presentationArt';
 import { SectionId } from '../engine/types';
+import { SlideVisualArt } from './SlideVisualArt';
 
 type DocsTopic = 'manual' | 'chromeos' | 'fuchsia' | 'rtos';
 
@@ -190,14 +195,17 @@ export const DocsManualScreen: React.FC = () => {
   const [topic, setTopic] = useState<DocsTopic>('manual');
   const [presentationMode, setPresentationMode] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
+  const [showArtPrompt, setShowArtPrompt] = useState(false);
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
 
   const dossier = topic !== 'manual' ? OS_DOSSIERS[topic] : null;
-  const totalSlides = 3;
+  const totalSlides = PRESENTATION_SLIDE_COUNT;
 
   // Reset slide index when topic changes
   const handleSelectTopic = (nextTopic: DocsTopic) => {
     setTopic(nextTopic);
     setSlideIndex(0);
+    setCopiedPrompt(false);
   };
 
   // Keyboard navigation in Presentation Mode
@@ -218,202 +226,43 @@ export const DocsManualScreen: React.FC = () => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [presentationMode, totalSlides]);
 
-  const renderPresentationSlide = () => {
-    if (topic === 'manual') {
-      if (slideIndex === 0) {
-        return (
-          <div className="space-y-8">
-            <div className="space-y-2">
-              <p className="text-base sm:text-lg font-semibold text-sky-700">
-                Diapositiva 1 · Manual de Usuario
-              </p>
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
-                Cómo operar el Laboratorio de SO Emergentes
-              </h2>
-            </div>
+  const activePresentationDossier = dossier ?? OS_DOSSIERS.chromeos;
+  const activeArtSpec =
+    SLIDE_ART_CATALOG[activePresentationDossier.id][slideIndex] ??
+    SLIDE_ART_CATALOG[activePresentationDossier.id][0];
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-7 space-y-4">
-                <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center gap-3">
-                  <BookOpen className="w-6 h-6 text-sky-700 shrink-0" />
-                  <span>Motor Compartido y Persistencia</span>
-                </h3>
-                <p className="text-lg sm:text-xl text-slate-800 leading-relaxed">
-                  Los tres sistemas operativos comparten un reloj único de simulación. Cambia entre
-                  pestañas sin perder ventanas, historias de Fuchsia ni sensores del RTOS.
-                </p>
-                <p className="text-lg sm:text-xl text-slate-800 leading-relaxed">
-                  Usa <strong>Pausar / Reanudar motor</strong> arriba a la derecha para congelar o
-                  reactivar todos los procesos en vivo.
-                </p>
-              </div>
-
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-7 space-y-4">
-                <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center gap-3">
-                  <ShieldCheck className="w-6 h-6 text-emerald-700 shrink-0" />
-                  <span>Ejes de Estudio en Clase</span>
-                </h3>
-                <ul className="space-y-3 text-lg sm:text-xl text-slate-800 leading-relaxed">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-sky-700 shrink-0 mt-1" />
-                    <span><strong>Ligereza e IoT:</strong> del navegador aislado a kilobytes en SRAM.</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-rose-700 shrink-0 mt-1" />
-                    <span><strong>Microkernels:</strong> Zircon y comunicación tipada por canales FIDL.</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-6 h-6 text-amber-700 shrink-0 mt-1" />
-                    <span><strong>Seguridad por diseño:</strong> particiones A/B, handles y MPU/WDT.</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      if (slideIndex === 1) {
-        return (
-          <div className="space-y-8">
-            <div className="space-y-2">
-              <p className="text-base sm:text-lg font-semibold text-sky-700">
-                Diapositiva 2 · Guías de Escritorio y Workstation
-              </p>
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
-                Uso práctico: Chrome OS y Google Fuchsia
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-7 flex flex-col justify-between gap-6">
-                <div className="space-y-4">
-                  <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center gap-3">
-                    <Monitor className="w-6 h-6 text-sky-600 shrink-0" />
-                    <span>Pantalla Chrome OS</span>
-                  </h3>
-                  <ul className="space-y-3 text-lg sm:text-xl text-slate-800 leading-relaxed list-disc pl-6">
-                    <li>Ventanas arrastrables, redimensionables y minimizables al estante.</li>
-                    <li>Cada pestaña registra su PID en <strong>Monitor de tareas</strong> (Shift+Esc).</li>
-                    <li>Ajustes rápidos en la bandeja derecha (Wi-Fi, Bluetooth, Brillo).</li>
-                    <li>Terminal Crosh: <span className="font-mono">ps</span>, <span className="font-mono">free -m</span>, <span className="font-mono">ping</span>.</li>
-                  </ul>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveSection('chromeos')}
-                  className="self-start inline-flex items-center gap-2 px-5 py-3 text-base font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-800 cursor-pointer"
-                >
-                  <span>Abrir Chrome OS</span>
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-7 flex flex-col justify-between gap-6">
-                <div className="space-y-4">
-                  <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center gap-3">
-                    <Layers className="w-6 h-6 text-rose-600 shrink-0" />
-                    <span>Pantalla Google Fuchsia</span>
-                  </h3>
-                  <ul className="space-y-3 text-lg sm:text-xl text-slate-800 leading-relaxed list-disc pl-6">
-                    <li>Trabaja con <strong>Stories</strong> modulares y vista <strong>Overview</strong>.</li>
-                    <li>Agrega, reordena o cierra módulos desde la cabecera de la Story.</li>
-                    <li>Inspecciona protocolos y handles <span className="font-mono">zx::*</span> en <strong>Componentes</strong>.</li>
-                    <li>Terminal ffx: <span className="font-mono">ffx component list</span>, <span className="font-mono">ffx log</span>.</li>
-                  </ul>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveSection('fuchsia')}
-                  className="self-start inline-flex items-center gap-2 px-5 py-3 text-base font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-800 cursor-pointer"
-                >
-                  <span>Abrir Fuchsia</span>
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      return (
-        <div className="space-y-8">
-          <div className="space-y-2">
-            <p className="text-base sm:text-lg font-semibold text-sky-700">
-              Diapositiva 3 · Hardware Embebido y Pruebas
-            </p>
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
-              Uso práctico: RTOS Embebido y Laboratorio de Pruebas
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-7 flex flex-col justify-between gap-6">
-              <div className="space-y-4">
-                <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center gap-3">
-                  <Cpu className="w-6 h-6 text-amber-600 shrink-0" />
-                  <span>Sistema Embebido (RTOS)</span>
-                </h3>
-                <ul className="space-y-3 text-lg sm:text-xl text-slate-800 leading-relaxed list-disc pl-6">
-                  <li>Placa física con OLED 128×64, LEDs reactivos y botón <strong>EN / RST</strong>.</li>
-                  <li>Sliders de Temperatura (≥ 50 °C activa alarma), Luz y Voltaje.</li>
-                  <li>Monitor <strong>htop RTOS</strong> para suspender/reanudar tareas en tiempo real.</li>
-                  <li>UART CLI: <span className="font-mono">tasks</span>, <span className="font-mono">blink 200</span>, <span className="font-mono">panic</span>.</li>
-                </ul>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveSection('rtos')}
-                className="self-start inline-flex items-center gap-2 px-5 py-3 text-base font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-800 cursor-pointer"
-              >
-                <span>Abrir RTOS Embebido</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-7 flex flex-col justify-between gap-6">
-              <div className="space-y-4">
-                <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center gap-3">
-                  <Terminal className="w-6 h-6 text-slate-700 shrink-0" />
-                  <span>Laboratorio de Pruebas</span>
-                </h3>
-                <ul className="space-y-3 text-lg sm:text-xl text-slate-800 leading-relaxed list-disc pl-6">
-                  <li>Suite automática de 6 aserciones sobre los tres sistemas.</li>
-                  <li>Inyección de estrés: 3 pestañas pesadas, ráfaga FIDL o pico térmico.</li>
-                  <li>Comparativa en vivo de RAM (MB), VMOs y pilas SRAM (KB).</li>
-                </ul>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveSection('pruebas')}
-                className="self-start inline-flex items-center gap-2 px-5 py-3 text-base font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-800 cursor-pointer"
-              >
-                <span>Abrir Laboratorio de Pruebas</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      );
+  const handleCopyPrompt = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(activeArtSpec.prompt).catch(() => {});
     }
+    setCopiedPrompt(true);
+    window.setTimeout(() => setCopiedPrompt(false), 1800);
+  };
 
-    if (!dossier) return null;
+  const renderPresentationSlide = () => {
+    const activeDossier = activePresentationDossier;
+    const accentLabel =
+      activeDossier.id === 'chromeos'
+        ? 'text-sky-700'
+        : activeDossier.id === 'fuchsia'
+          ? 'text-rose-700'
+          : 'text-amber-700';
 
     if (slideIndex === 0) {
       return (
         <div className="space-y-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-2">
-              <p className="text-base sm:text-lg font-semibold text-sky-700">
+              <p className={`text-base sm:text-lg font-semibold ${accentLabel}`}>
                 Diapositiva 1 · Origen, Filosofía y Arquitectura
               </p>
               <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
-                {dossier.name}
+                {activeDossier.name}
               </h2>
             </div>
             <button
               type="button"
-              onClick={() => setActiveSection(dossier.targetSection)}
+              onClick={() => setActiveSection(activeDossier.targetSection)}
               className="inline-flex items-center gap-2 px-5 py-3 text-base font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-800 cursor-pointer"
             >
               <span>Abrir simulador</span>
@@ -422,33 +271,20 @@ export const DocsManualScreen: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-7 space-y-5 text-lg sm:text-xl text-slate-800 leading-relaxed">
+            <div className="lg:col-span-5 space-y-5 text-lg sm:text-xl text-slate-800 leading-relaxed">
               <p>
-                <strong className="text-slate-900">Origen:</strong> {dossier.origin}
+                <strong className="text-slate-900">Origen:</strong> {activeDossier.origin}
               </p>
               <p>
-                <strong className="text-slate-900">Filosofía:</strong> {dossier.philosophy}
+                <strong className="text-slate-900">Filosofía:</strong> {activeDossier.philosophy}
               </p>
               <p>
-                <strong className="text-slate-900">Arquitectura:</strong> {dossier.architectureSummary}
+                <strong className="text-slate-900">Arquitectura:</strong> {activeDossier.architectureSummary}
               </p>
             </div>
 
-            <div className="lg:col-span-5 space-y-3">
-              {dossier.layers.map((layer, idx) => (
-                <div
-                  key={layer.label}
-                  className={`px-5 py-4 rounded-xl border ${layer.accent} flex items-center justify-between gap-4`}
-                >
-                  <div>
-                    <div className="text-base sm:text-lg font-bold">{layer.label}</div>
-                    <div className="text-sm sm:text-base opacity-90 mt-0.5">{layer.detail}</div>
-                  </div>
-                  <span className="font-mono text-sm font-semibold opacity-75 shrink-0">
-                    L{dossier.layers.length - idx}
-                  </span>
-                </div>
-              ))}
+            <div className="lg:col-span-7">
+              <SlideVisualArt osId={activeDossier.id} slideIndex={0} />
             </div>
           </div>
         </div>
@@ -459,34 +295,104 @@ export const DocsManualScreen: React.FC = () => {
       return (
         <div className="space-y-8">
           <div className="space-y-2">
-            <p className="text-base sm:text-lg font-semibold text-sky-700">
-              Diapositiva 2 · {dossier.name} — Conceptos Clave Aplicados
+            <p className={`text-base sm:text-lg font-semibold ${accentLabel}`}>
+              Diapositiva 2 · {activeDossier.name} — Pila Arquitectónica
             </p>
             <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
-              Procesos, memoria, actualizaciones y seguridad por diseño
+              Separación de capas de interfaz a hardware
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {dossier.concepts.map((c) => (
-              <div
-                key={c.title}
-                className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col justify-between gap-5"
-              >
-                <div className="space-y-3">
-                  <div className="text-sm sm:text-base font-semibold text-sky-700">{c.concept}</div>
-                  <h3 className="font-display text-2xl font-bold text-slate-900">{c.title}</h3>
-                  <p className="text-lg text-slate-800 leading-relaxed">{c.explanation}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveSection(dossier.targetSection)}
-                  className="text-left text-base font-semibold text-sky-700 hover:text-sky-900 cursor-pointer"
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-5 space-y-3">
+              {activeDossier.layers.map((layer, idx) => (
+                <div
+                  key={layer.label}
+                  className={`px-4 py-3.5 rounded-xl border ${layer.accent} flex items-center justify-between gap-3`}
                 >
-                  {c.simulatorLinkLabel} →
-                </button>
+                  <div>
+                    <div className="text-base font-bold">{layer.label}</div>
+                    <div className="text-sm opacity-90 mt-0.5">{layer.detail}</div>
+                  </div>
+                  <span className="font-mono text-sm font-semibold opacity-75 shrink-0">
+                    L{activeDossier.layers.length - idx}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="lg:col-span-7">
+              <SlideVisualArt osId={activeDossier.id} slideIndex={1} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (slideIndex >= 2 && slideIndex <= 4) {
+      const conceptItem = activeDossier.concepts[slideIndex - 2];
+      return (
+        <div className="space-y-8">
+          <div className="space-y-2">
+            <p className={`text-base sm:text-lg font-semibold ${accentLabel}`}>
+              Diapositiva {slideIndex + 1} · {activeDossier.name} — {conceptItem.concept}
+            </p>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
+              {conceptItem.title}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-5 bg-slate-50 border border-slate-200 rounded-2xl p-7 flex flex-col justify-between gap-6">
+              <div className="space-y-4">
+                <div className={`text-base font-semibold ${accentLabel}`}>{conceptItem.concept}</div>
+                <p className="text-lg sm:text-xl text-slate-800 leading-relaxed">
+                  {conceptItem.explanation}
+                </p>
               </div>
-            ))}
+              <button
+                type="button"
+                onClick={() => setActiveSection(activeDossier.targetSection)}
+                className="self-start inline-flex items-center gap-2 px-5 py-3 text-base font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-800 cursor-pointer"
+              >
+                <span>{conceptItem.simulatorLinkLabel}</span>
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="lg:col-span-7">
+              <SlideVisualArt osId={activeDossier.id} slideIndex={slideIndex} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (slideIndex === 5) {
+      return (
+        <div className="space-y-8">
+          <div className="space-y-2">
+            <p className={`text-base sm:text-lg font-semibold ${accentLabel}`}>
+              Diapositiva 6 · {activeDossier.name} — Impacto en la Industria
+            </p>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
+              Influencia actual
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-5 bg-slate-50 border border-slate-200 rounded-2xl p-7 space-y-4">
+              <p className="text-lg sm:text-xl text-slate-800 leading-relaxed">
+                {activeDossier.influence}
+              </p>
+              <p className="text-base text-slate-600 leading-relaxed pt-2 border-t border-slate-200">
+                {activeDossier.tagline}
+              </p>
+            </div>
+
+            <div className="lg:col-span-7">
+              <SlideVisualArt osId={activeDossier.id} slideIndex={5} />
+            </div>
           </div>
         </div>
       );
@@ -495,30 +401,28 @@ export const DocsManualScreen: React.FC = () => {
     return (
       <div className="space-y-8">
         <div className="space-y-2">
-          <p className="text-base sm:text-lg font-semibold text-sky-700">
-            Diapositiva 3 · {dossier.name} — Impacto y Futuro
+          <p className={`text-base sm:text-lg font-semibold ${accentLabel}`}>
+            Diapositiva 7 · {activeDossier.name} — Proyección Tecnológica
           </p>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
-            Influencia actual y tendencias futuras
+            Tendencias futuras
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-5 bg-slate-50 border border-slate-200 rounded-2xl p-7 space-y-3">
-            <h3 className="font-display text-2xl font-bold text-slate-900">Influencia actual</h3>
-            <p className="text-lg sm:text-xl text-slate-800 leading-relaxed">{dossier.influence}</p>
-          </div>
-
-          <div className="lg:col-span-7 bg-slate-50 border border-slate-200 rounded-2xl p-7 space-y-4">
-            <h3 className="font-display text-2xl font-bold text-slate-900">Tendencias futuras</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-5 bg-slate-50 border border-slate-200 rounded-2xl p-7">
             <ul className="space-y-4">
-              {dossier.futureTrends.map((trend) => (
-                <li key={trend} className="flex items-start gap-3 text-lg sm:text-xl text-slate-800 leading-relaxed">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-700 shrink-0 mt-1" />
+              {activeDossier.futureTrends.map((trend) => (
+                <li key={trend} className="flex items-start gap-3 text-base sm:text-lg text-slate-800 leading-relaxed">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0 mt-1" />
                   <span>{trend}</span>
                 </li>
               ))}
             </ul>
+          </div>
+
+          <div className="lg:col-span-7">
+            <SlideVisualArt osId={activeDossier.id} slideIndex={6} />
           </div>
         </div>
       </div>
@@ -568,31 +472,37 @@ export const DocsManualScreen: React.FC = () => {
                 { id: 'fuchsia', label: 'Google Fuchsia' },
                 { id: 'rtos', label: 'RTOS Embebido' },
               ] as { id: DocsTopic; label: string }[]
-            ).map((tab) => {
-              const active = topic === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => handleSelectTopic(tab.id)}
-                  className={`px-4 py-2 text-sm sm:text-base font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    active
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-700 hover:text-slate-900'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
+            )
+              .filter((tab) => !presentationMode || tab.id !== 'manual')
+              .map((tab) => {
+                const active = topic === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => handleSelectTopic(tab.id)}
+                    className={`px-4 py-2 text-sm sm:text-base font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                      active
+                        ? 'bg-white text-slate-900 shadow-xs'
+                        : 'text-slate-700 hover:text-slate-900'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
           </div>
 
           <button
             type="button"
             onClick={() => {
-              setPresentationMode((v) => !v);
+              const nextPresentationMode = !presentationMode;
+              if (nextPresentationMode && topic === 'manual') {
+                setTopic('chromeos');
+              }
+              setPresentationMode(nextPresentationMode);
               setSlideIndex(0);
             }}
             className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm sm:text-base font-semibold rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
@@ -624,31 +534,92 @@ export const DocsManualScreen: React.FC = () => {
         >
           <div className="flex-1 flex flex-col justify-center">{renderPresentationSlide()}</div>
 
-          <div className="pt-6 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
-            <div className="text-base font-mono tabular-nums font-semibold text-slate-600">
-              Diapositiva {slideIndex + 1} de {totalSlides} · Usa las flechas ← / →
+          <div className="pt-6 border-t border-slate-200 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-base font-mono tabular-nums font-semibold text-slate-600">
+                  Diapositiva {slideIndex + 1} de {totalSlides}
+                </span>
+                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg" role="group" aria-label="Saltar a diapositiva">
+                  {Array.from({ length: totalSlides }, (_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSlideIndex(idx)}
+                      aria-label={`Ir a diapositiva ${idx + 1}`}
+                      aria-current={slideIndex === idx ? 'step' : undefined}
+                      className={`w-8 h-8 text-sm font-mono font-semibold rounded-md transition-colors cursor-pointer ${
+                        slideIndex === idx
+                          ? 'bg-slate-900 text-white'
+                          : 'text-slate-700 hover:bg-white'
+                      }`}
+                    >
+                      {idx + 1}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowArtPrompt((v) => !v)}
+                  className={`inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold rounded-lg border transition-colors cursor-pointer ${
+                    showArtPrompt
+                      ? 'bg-sky-50 border-sky-300 text-sky-900'
+                      : 'border-slate-300 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  <span>{showArtPrompt ? 'Ocultar infografía y prompt' : 'Infografía y prompt 16:9'}</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  disabled={slideIndex === 0}
+                  onClick={() => setSlideIndex((i) => Math.max(0, i - 1))}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-base font-semibold rounded-xl border border-slate-300 text-slate-800 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Anterior</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={slideIndex === totalSlides - 1}
+                  onClick={() => setSlideIndex((i) => Math.min(totalSlides - 1, i + 1))}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-base font-semibold rounded-xl bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-40 cursor-pointer"
+                >
+                  <span>Siguiente</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                disabled={slideIndex === 0}
-                onClick={() => setSlideIndex((i) => Math.max(0, i - 1))}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-base font-semibold rounded-xl border border-slate-300 text-slate-800 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Anterior</span>
-              </button>
-              <button
-                type="button"
-                disabled={slideIndex === totalSlides - 1}
-                onClick={() => setSlideIndex((i) => Math.min(totalSlides - 1, i + 1))}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-base font-semibold rounded-xl bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-40 cursor-pointer"
-              >
-                <span>Siguiente</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+            {showArtPrompt && (
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-2.5 text-sm sm:text-base">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="font-bold text-slate-900">
+                    {activeArtSpec.topicTitle} · {activeArtSpec.graphicType}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyPrompt}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-white border border-slate-300 text-slate-800 hover:bg-slate-100 cursor-pointer"
+                  >
+                    {copiedPrompt ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    <span>{copiedPrompt ? 'Prompt copiado' : 'Copiar prompt 16:9'}</span>
+                  </button>
+                </div>
+                <p className="text-slate-700">
+                  <strong className="text-slate-900">Cómo se adapta al texto:</strong> {activeArtSpec.textAdaptation}
+                </p>
+                <p className="text-slate-700">
+                  <strong className="text-slate-900">Distribución en la lámina:</strong> {activeArtSpec.layoutDistribution}
+                </p>
+                <p className="font-mono text-xs sm:text-sm text-slate-800 bg-white border border-slate-200 rounded-lg p-3 leading-relaxed">
+                  {activeArtSpec.prompt}
+                </p>
+              </div>
+            )}
           </div>
         </section>
       ) : topic === 'manual' ? (
