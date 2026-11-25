@@ -5,34 +5,7 @@ interface CoverPresentationBannerProps {
   onStartTour: () => void;
 }
 
-const UdoEmblemSvg: React.FC<{ className?: string }> = ({ className = 'w-16 h-16' }) => (
-  <svg viewBox="0 0 120 120" className={className} role="img" aria-label="Emblema Universidad de Oriente Venezuela">
-    {/* Outer gold ring */}
-    <circle cx="60" cy="60" r="56" fill="#eab308" stroke="#ca8a04" strokeWidth="2.5" />
-    <circle cx="60" cy="60" r="41" fill="#0f2547" stroke="#ca8a04" strokeWidth="2" />
-    {/* Circular text paths */}
-    <defs>
-      <path id="udo-top-arc" d="M 16,60 A 44,44 0 1,1 104,60" />
-      <path id="udo-bottom-arc" d="M 18,66 A 44,44 0 0,0 102,66" />
-    </defs>
-    <text fill="#1e293b" fontSize="8.8" fontWeight="800" fontFamily="system-ui, sans-serif" letterSpacing="0.8">
-      <textPath href="#udo-top-arc" startOffset="50%" textAnchor="middle">
-        UNIVERSIDAD DE ORIENTE
-      </textPath>
-    </text>
-    <text fill="#1e293b" fontSize="8.2" fontWeight="800" fontFamily="system-ui, sans-serif" letterSpacing="1.2">
-      <textPath href="#udo-bottom-arc" startOffset="50%" textAnchor="middle">
-        VENEZUELA
-      </textPath>
-    </text>
-    {/* Inner 8-point compass star */}
-    <polygon points="60,24 65,52 94,60 65,68 60,96 55,68 26,60 55,52" fill="#f8fafc" stroke="#eab308" strokeWidth="1.5" />
-    <polygon points="60,34 64,54 84,60 64,66 60,86 56,66 36,60 56,54" fill="#38bdf8" opacity="0.45" />
-    <polygon points="39,39 58,54 81,81 62,66" fill="#facc15" />
-    <polygon points="81,39 62,54 39,81 58,66" fill="#facc15" />
-    <circle cx="60" cy="60" r="6" fill="#facc15" stroke="#0f2547" strokeWidth="1.5" />
-  </svg>
-);
+const UDO_LOGO_SRC = `${import.meta.env.BASE_URL}assets/aistudio/image_98e7fd12.png`;
 
 const IsometricLayerStackSvg: React.FC = () => {
   const layers = [
@@ -212,7 +185,11 @@ export const CoverPresentationBanner: React.FC<CoverPresentationBannerProps> = (
         <div className="lg:col-span-7 space-y-6 sm:space-y-7">
           {/* University Header */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5">
-            <UdoEmblemSvg className="w-16 h-16 sm:w-[74px] sm:h-[74px] shrink-0" />
+            <img
+              src={UDO_LOGO_SRC}
+              alt="Logo Universidad de Oriente Venezuela"
+              className="w-16 h-16 sm:w-[76px] sm:h-[76px] shrink-0 object-contain drop-shadow-sm"
+            />
             <div className="text-center sm:text-center flex-1 space-y-1">
               <div className="font-display text-lg sm:text-xl lg:text-[22px] font-extrabold tracking-wide text-white uppercase">
                 UNIVERSIDAD DE ORIENTE
