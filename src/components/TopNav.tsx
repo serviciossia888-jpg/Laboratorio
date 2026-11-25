@@ -34,7 +34,12 @@ export const TopNav: React.FC = () => {
             <button
               key={item.id}
               type="button"
-              onClick={() => setActiveSection(item.id)}
+              onClick={() => {
+                setActiveSection(item.id);
+                if (item.id === 'docs') {
+                  window.dispatchEvent(new CustomEvent('docs:enter-presentation'));
+                }
+              }}
               aria-current={isActive ? 'page' : undefined}
               className={`px-2.5 lg:px-3 py-1.5 text-xs lg:text-sm font-medium rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-sky-600 ${
                 isActive

@@ -192,14 +192,25 @@ const OS_DOSSIERS: Record<Exclude<DocsTopic, 'manual'>, OSDossier> = {
 
 export const DocsManualScreen: React.FC = () => {
   const { setActiveSection } = useSimulation();
-  const [topic, setTopic] = useState<DocsTopic>('manual');
-  const [presentationMode, setPresentationMode] = useState(false);
+  const [topic, setTopic] = useState<DocsTopic>('chromeos');
+  const [presentationMode, setPresentationMode] = useState(true);
   const [slideIndex, setSlideIndex] = useState(0);
   const [showArtPrompt, setShowArtPrompt] = useState(false);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
 
   const dossier = topic !== 'manual' ? OS_DOSSIERS[topic] : null;
   const totalSlides = PRESENTATION_SLIDE_COUNT;
+
+  useEffect(() => {
+    const enterPresentation = () => {
+      setTopic((prev) => (prev === 'manual' ? 'chromeos' : prev));
+      setPresentationMode(true);
+      setSlideIndex(0);
+      setCopiedPrompt(false);
+    };
+    window.addEventListener('docs:enter-presentation', enterPresentation);
+    return () => window.removeEventListener('docs:enter-presentation', enterPresentation);
+  }, []);
 
   // Reset slide index when topic changes
   const handleSelectTopic = (nextTopic: DocsTopic) => {
