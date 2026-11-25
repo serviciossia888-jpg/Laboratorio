@@ -1,7 +1,8 @@
 import React from 'react';
-import { ArrowRight, Cpu, FlaskConical, Layers, Monitor, RotateCcw } from 'lucide-react';
+import { ArrowRight, BookOpen, Cpu, FlaskConical, Layers, Monitor, RotateCcw } from 'lucide-react';
 import { useSimulation } from '../engine/SimulationContext';
 import { SectionId } from '../engine/types';
+import { CoverPresentationBanner } from './CoverPresentationBanner';
 
 export const OverviewScreen: React.FC = () => {
   const { state, setActiveSection, resetAll } = useSimulation();
@@ -95,16 +96,19 @@ export const OverviewScreen: React.FC = () => {
   ];
 
   return (
-    <main className="max-w-7xl mx-auto px-4 lg:px-8 py-10 space-y-12">
-      {/* Hero section */}
+    <main className="max-w-7xl mx-auto px-4 lg:px-8 py-8 space-y-12">
+      {/* Presentation Cover from PDF */}
+      <CoverPresentationBanner onStartTour={() => setActiveSection('chromeos')} />
+
+      {/* Lab Intro & Live Shared Engine Summary */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         <div className="lg:col-span-7 space-y-5">
           <p className="text-xs font-semibold tracking-wide text-sky-700">
             Entorno interactivo de arquitecturas operativas
           </p>
-          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 text-balance leading-[1.12]">
+          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-slate-900 text-balance leading-[1.15]">
             Laboratorio de Sistemas Operativos Emergentes y de Nicho
-          </h1>
+          </h2>
           <p className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed">
             Explora tres filosofías radicalmente distintas de diseño operativo desde sus interfaces
             nativas hasta su motor de simulación compartido: escritorio multi-proceso, microkernel
@@ -121,11 +125,19 @@ export const OverviewScreen: React.FC = () => {
             </button>
             <button
               type="button"
+              onClick={() => setActiveSection('docs')}
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-800 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+            >
+              <BookOpen className="w-4 h-4 text-sky-700" />
+              <span>Presentación y Documentación</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setActiveSection('pruebas')}
               className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-800 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
             >
               <FlaskConical className="w-4 h-4 text-sky-700" />
-              <span>Ir al Laboratorio de Pruebas</span>
+              <span>Laboratorio de Pruebas</span>
             </button>
             <button
               type="button"
